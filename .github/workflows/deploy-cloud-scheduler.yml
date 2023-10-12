@@ -35,14 +35,16 @@ jobs:
       run: |
         _operation="create"
 
-        if gcloud scheduler jobs describe ${{ secrets.SCHEDULER_JOB_NAME }} ; then
+        if gcloud scheduler jobs describe ${{ secrets.SCHEDULER_JOB_NAME }} --location="${{ secrets.REGION_NAME }}"; then
           _operation="update"
         fi
         gcloud scheduler jobs http $_operation ${{ secrets.SCHEDULER_JOB_NAME }} \
           --schedule="${{ secrets.SCHEDULER_VALUE }}" \
           --uri="${{ secrets.SCHEDULER_JOB_URL }}" \
           --oidc-service-account-email="${{ secrets.SERVICE_ACCOUNT_EMAIL }}" \
-          --oidc-token-audience="${{ secrets.SCHEDULER_JOB_URL }}"
+          --oidc-token-audience="${{ secrets.SCHEDULER_JOB_URL }}" \
+          --http-method=POST \
+          --location="${{ secrets.REGION_NAME }}"
     
     - name: Post Processing
       run : |
