@@ -1,0 +1,49 @@
+name: Deploy to Google Cloud Scheduler Job
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 20
+    
+    - name: Setup Google Cloud Authentication
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: Decode GCP Service Account Key
+      run: |
+        echo "${{ secrets.GCP_SA_KEY_BASE64 }}" | base64 -d > temp-sa.json
+    
+    - name: Authenticate with gcloud using temp-sa.json
+      run: |
+        gcloud auth activate-service-account --key-file=temp-sa.json
+
+    - name: Deploy Cloud Scheduler Job
+      run: |
+        _operation="create"
+
+        if gcloud scheduler jobs describe ${{ secrets.SCHEDULER_JOB_NAME }} ; then
+          _operation="update"
+        fi
+        gcloud scheduler jobs http $_operation ${{ secrets.SCHEDULER_JOB_NAME }} \
+          --schedule="${{ secrets.SCHEDULER_VALUE }}" \
+          --uri="${{ secrets.SCHEDULER_JOB_URL }}" \
+          --oidc-service-account-email="${{ secrets.SERVICE_ACCOUNT_EMAIL }}" \
+          --oidc-token-audience="${{ secrets.SCHEDULER_JOB_URL }}"
+    
+    - name: Post Processing
+      run : |
+        rm -f temp-sa.json
