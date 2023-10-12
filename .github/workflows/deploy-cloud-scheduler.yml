@@ -38,7 +38,7 @@ jobs:
         if gcloud scheduler jobs describe ${{ secrets.SCHEDULER_JOB_NAME }} --location="${{ secrets.REGION_NAME }}"; then
           _operation="update"
         fi
-        gcloud scheduler jobs http $_operation ${{ secrets.SCHEDULER_JOB_NAME }} \
+        gcloud scheduler jobs $_operation http ${{ secrets.SCHEDULER_JOB_NAME }} \
           --schedule="${{ secrets.SCHEDULER_VALUE }}" \
           --uri="${{ secrets.SCHEDULER_JOB_URL }}" \
           --oidc-service-account-email="${{ secrets.SERVICE_ACCOUNT_EMAIL }}" \
