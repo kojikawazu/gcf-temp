@@ -44,7 +44,9 @@ jobs:
           --oidc-service-account-email="${{ secrets.SERVICE_ACCOUNT_EMAIL }}" \
           --oidc-token-audience="${{ secrets.SCHEDULER_JOB_URL }}" \
           --http-method=POST \
-          --location="${{ secrets.REGION_NAME }}"
+          --location="${{ secrets.REGION_NAME }}" \
+          --description="${{ secrets.SCHEDULER_DESC }}" \
+          --time-zone="${{ secrets.SCHEDULER_TIME_ZONE }}"
     
     - name: Post Processing
       run : |
